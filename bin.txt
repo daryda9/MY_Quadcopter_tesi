@@ -1,0 +1,107 @@
+//controllore grezzo, non usare(ex main.h)
+
+void pitch_adjust(float *cmd_1,float *cmd_2,float *cmd_3,float *cmd_4,float error){ //correzione pitch
+    //Serial.print("correzione pitch: ");
+    
+    //Serial.print(" motore 1: "); Serial.print(*cmd_1);Serial.print(" motore 2: "); Serial.print(*cmd_2);
+    //Serial.print(" motore 3: "); Serial.print(*cmd_3);Serial.print(" motore 4: "); Serial.println(*cmd_4);
+    
+
+
+    if (error<-0.001){
+        //Serial.print(" errore >0, ");
+
+        if (*cmd_1>=min_throttle_1 && *cmd_1<1800)//evito saturazione
+        {
+            //Serial.print("incremento motore 1, da: "); Serial.print(*cmd_1);
+            *cmd_1=*cmd_1+1;
+            //Serial.print(" a: "); Serial.println(*cmd_1);
+            if (*cmd_2 > min_throttle_2 && *cmd_2<=1800)
+            {
+                //Serial.print("decremento motore 2, da: "); Serial.print(*cmd_2);
+                *cmd_2= *cmd_2-1;
+                //Serial.print(" a: "); Serial.println(*cmd_2);
+            }
+            
+            
+        }
+        
+        if (*cmd_4>=min_throttle_4 && *cmd_4<1800)//evito saturazione
+        {
+            *cmd_4=*cmd_4+1;
+            if (*cmd_3 > min_throttle_3 && *cmd_3 <=1800)
+            {
+                *cmd_3=*cmd_3-1;
+            }
+        }
+    }
+    else if (error>0.001){
+        //Serial.print("errore <0, ");
+        if (*cmd_3 >= min_throttle_3 && *cmd_3 < 1800)//evito saturazione
+        {
+            *cmd_3=*cmd_3+1;
+            if (*cmd_1 > min_throttle_1 && *cmd_1 <= 1800)
+            {
+                *cmd_1=*cmd_1-1;
+            }
+        }
+        if (*cmd_2 >= min_throttle_2 && *cmd_2 < 1800)//evito saturazione
+        {
+            *cmd_2=*cmd_2+1;
+            if (*cmd_4 > min_throttle_4 && *cmd_4 <= 1800)
+            {
+                *cmd_4=*cmd_4-1;
+            }
+        }
+        
+    }
+    else //if(error>-0.001 && error<0.001)
+    {
+        *cmd_1=min_throttle_1;
+        *cmd_2=min_throttle_2;
+        *cmd_3=min_throttle_3;
+        *cmd_4=min_throttle_4;
+    }
+    
+        //Serial.print(" errore: "); Serial.print(error); Serial.print(" \t ");
+    
+}
+
+
+
+/*non usata, con eulero
+    int loop_function(float yaw, float pitch,float  roll){ //funione da avviare nel  loop principale
+    //Calcolo errori
+    Serial.print("pitch:");Serial.print(pitch);Serial.print(" roll: ");Serial.print(roll);Serial.print(" yaw: ");Serial.println(yaw);
+    error_yaw=e_yaw(yaw);
+    error_pitch=e_pitch(pitch);
+    error_roll=e_roll(roll);
+    //stampa a video di tutti gli errori
+    Serial.print("errore pitch: ");Serial.println(error_pitch);
+    Serial.print("errore roll: ");Serial.println(error_roll);
+    Serial.print("errore yaw: ");Serial.println(error_yaw);   
+}
+*/
+
+//calcolo pid vecchio
+float PID_pitch(float *error,float *elapsed_Time,float *prev_e){
+    float Ti,Td;
+    float P,I,D;
+    float e;
+    e=*error;
+    
+        P=kp_pitch*e;
+        I=I+(ki_pitch*e);
+        D=kd_pitch*((e-(*prev_e))/(*elapsed_Time));
+        pid_pitch=10*(P+I+D);
+    
+   /* VERSIONE PID ALTERNATIVA
+    Ti=kp_pitch/ki_pitch;
+    Td=kd_pitch/ki_pitch;
+    I=(I+e)/Ti;
+    D=D=kd_pitch*((e-(*prev_e))/(*elapsed_Time));
+    pid_pitch=kp_pitch*(1+I+D);
+    */
+   return pid_pitch;
+}
+
