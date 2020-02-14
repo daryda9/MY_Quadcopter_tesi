@@ -37,7 +37,7 @@ void gyro_setup() {
 
 
 	Serial.begin(115200);  
-	Serial.println("--- Avvio dell'IMU, Dario ti lovvo ---");
+	Serial.println("--- Avvio dell'IMU ---");
 	Wire.begin();     
 	Wire.setClock(400000UL);        // set speed to 400k
 
